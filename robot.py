@@ -3,6 +3,7 @@
 
 import wpilib
 from wpilib import drive
+from wpilib import timer
 import ctre
 # from networktables import networktables
 
@@ -29,12 +30,14 @@ class robot(wpilib.IterativeRobot):
         # self.rl_motor.set(mode(Follower))
         # self.rl_motor.set(self.fl_motor.getDeviceID())
 
+
+
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
-        self.timer.reset()
-        self.timer.start()
+        wpilib.timer.reset()
+        wpilib.timer.start()
 
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
@@ -45,10 +48,33 @@ class robot(wpilib.IterativeRobot):
             else:
                 self.drive.arcadeDrive(0, 0)  # Stop robot
 
+    def teleopInit(self):
+        """This function is run once each time the robot enters telepo mode"""
+        self.TriggerLeft = self.controller.getTriggerAxis()
+        self.kLeft = self.controller.Hand.kLeft
+        self.kRight = self.controller.Hand.kRight
+
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
+        # NOTE: For Deploy
+        while self.isOperatorControl() and self.isEnabled():
 
-        self.drive.tankDrive(self.controller.getY(self.controller.Hand.kLeft), self.controller.getY(self.controller.Hand.kRight))
+            # backwards control
+            if self.controller.getBumper(self.kLeft):
+                self.TriggerLeft = self.TriggerLeft * -1
+
+            # if self.controller.getTriggerAxis(self.kLeft) < 0:
+            #     self.TriggerLeft = 0
+            # elif self.controller.getTriggerAxis(self.kRight) > 0:
+            #     self.TriggerLeft = 0
+
+            if self.controller.getBumper(self.kRight):
+                self.TriggerRight = self.TriggerRight * -1
+
+
+            self.drive.arcadeDrive(self.TriggerLeft, self.controller.getX(self.kLeft))
+        # NOTE: For Simulator
+        # self.drive.tankDrive(self.controller.getRawAxis(1), self.controller.getRawAxis(3))
 
 
 if __name__ == "__main__":
