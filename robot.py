@@ -1,16 +1,19 @@
 
 #!/usr/bin/env python3
+#Modified: 2/17
 
 import wpilib
 from wpilib import drive, timer
 import ctre
-# from networktables import NetworkTables
-
+from networktables import NetworkTables
 
 class robot(wpilib.IterativeRobot):
 
     def robotInit(self):
         '''Robot Initiation'''
+
+        wpilib.CameraServer.launch()
+        
 
         self.controller = wpilib.XboxController(0)
 
@@ -22,6 +25,8 @@ class robot(wpilib.IterativeRobot):
         self.fl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(0)
         self.rl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(1)
         self.left = wpilib.SpeedControllerGroup(self.fl_motor, self.rl_motor)
+
+        self.mid_motor = ctre.wpi_talonsrx.WPI_TalonSRX(5)
 
         self.lift = wpilib.Solenoid(0, 0)
         self.grab = wpilib.Solenoid(0, 1)
@@ -97,7 +102,8 @@ class robot(wpilib.IterativeRobot):
 
             # Drive
             self.drive.arcadeDrive(self.TriggerLeft, self.controller.getX(self.kLeft))
-
+            # Middle wheel
+            self.mid_motor.set(self.TriggerRight)
             # Solenoids
 
             if self.controller.getAButtonPressed() and self.lift.get() == False:
