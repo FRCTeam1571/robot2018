@@ -7,13 +7,30 @@ from wpilib import drive, Timer
 import ctre
 from networktables import NetworkTables
 
+import wpi.cscore
+
+import cv2
+import numpy as np
+
+
+
 class robot(wpilib.IterativeRobot):
 
     def robotInit(self):
         '''Robot Initiation'''
 
-        wpilib.CameraServer.launch()
-        
+        # NetworkTables.initialize(server='roborio-1571-frc.local')
+
+        # cs = CameraServer.getInstance()
+        # cs.enableLogging()
+        #
+        # camera = cs.startAutomaticCapture()
+        #
+        # camera.setResolution(320, 240)
+        #
+        # x = cs.getInstance()
+        # print(x)
+
 
         self.controller = wpilib.XboxController(0)
 
@@ -58,7 +75,6 @@ class robot(wpilib.IterativeRobot):
         self.kRight = self.controller.Hand.kRight
         self.lift.set(False)
         self.grab.set(False)
-        # self.LiftToggle = False
         self.GrabToggle = False
         self.GrabLast = False
 
@@ -86,8 +102,10 @@ class robot(wpilib.IterativeRobot):
 
             # Drive
             self.drive.arcadeDrive(self.TriggerLeft, self.controller.getX(self.kLeft))
+
             # Middle wheel
             self.mid_motor.set(self.TriggerRight)
+
             # Solenoids
 
             if self.controller.getAButtonPressed() and self.lift.get() == False:
@@ -97,7 +115,6 @@ class robot(wpilib.IterativeRobot):
 
             if self.controller.getXButton() and not self.GrabLast:
                 self.GrabToggle = not self.GrabToggle
-
 
             self.GrabLast = self.controller.getXButton()
 
