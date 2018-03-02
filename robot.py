@@ -21,36 +21,36 @@ class robot(wpilib.IterativeRobot):
 
         # NetworkTables.initialize(server='roborio-1571-frc.local')
 
-        #cs = CameraServer.getInstance()
-        #cs.enableLogging()
-
-        #camera = cs.startAutomaticCapture()
-
-        #camera.setResolution(320, 240)
-
-        #x = cs.getInstance()
-        #print(x)
 
 
         self.controller = wpilib.XboxController(0)
 
-
+        # Talon SRX #
+        # Right drivetrain
         self.fr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(2) #2
         self.rr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(3) #3
         self.right = wpilib.SpeedControllerGroup(self.fr_motor, self.rr_motor)
 
-        self.fl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(0)
+        # Left drivetrain
+        self.fl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(0) #0
         self.rl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(1) #1
         self.left = wpilib.SpeedControllerGroup(self.fl_motor, self.rl_motor)
 
+        # Middle motor
         self.mid_motor = ctre.wpi_talonsrx.WPI_TalonSRX(5)
 
+
+        # Talon SR #
+        # Grab motors
+        self.intake_r = wpilib.Talon(0)
+        self.intake_l = wpilib.Talon(1)
+        self.intake = wpilib.SpeedControllerGroup(self.intake_r, self.intake_l)
+
+        # Solenoids #
         self.lift = wpilib.Solenoid(0, 0)
         self.grab = wpilib.Solenoid(0, 1)
 
         self.timer = wpilib.Timer()
-
-
 
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
 
@@ -64,8 +64,10 @@ class robot(wpilib.IterativeRobot):
         """This function is called periodically during autonomous."""
         while self.isAutonomous() and self.isEnabled():
             # Drive for two seconds
-            if self.timer.get() < 2.0:
+            if self.timer.get() < 0.0:
                 self.drive.arcadeDrive(-0.5, 0)  # Drive forwards at half speed
+            elif self.timer.get() < 5.0:
+                self.drive.arcadeDrive()
             else:
                 self.drive.arcadeDrive(0, 0)  # Stop robot
 
@@ -86,6 +88,7 @@ class robot(wpilib.IterativeRobot):
         """This function is called periodically during operator control."""
         while self.isOperatorControl() and self.isEnabled():
 
+            # Sets triggers and bumpers each loop
             self.TriggerLeft = self.controller.getTriggerAxis(self.kLeft)
             self.TriggerRight = self.controller.getTriggerAxis(self.kRight)
             self.BumperLeft = self.controller.getBumper(self.kLeft)
@@ -100,13 +103,24 @@ class robot(wpilib.IterativeRobot):
             if self.BumperRight:
                 self.TriggerRight = self.TriggerRight * -1
 
-            # Drive
+            # Drive #
             self.drive.arcadeDrive(self.TriggerLeft, self.controller.getX(self.kLeft))
 
             # Middle wheel
-            self.mid_motor.set(self.TriggerRight)
+            # self.mid_motor.set(self.TriggerRight)
+            self.mid_motor.set(self.controller.getX(self.kRight))
 
-            # Solenoids
+            if self.controller.getBButton():
+                self.intake.set(0.25)
+            elif self.controller.getYButton():
+                self.intake.set(-0.25)
+            else:
+                self.intake.set(0)
+
+
+
+
+            # Solenoids #
 
             if self.controller.getAButtonPressed() and self.lift.get() == False:
                 self.lift.set(True)
