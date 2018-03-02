@@ -7,9 +7,9 @@ from wpilib import drive, Timer
 import ctre
 from networktables import NetworkTables
 
-import wpi.cscore
+#import cscore
 
-import cv2
+#import cv2
 import numpy as np
 
 
@@ -21,26 +21,26 @@ class robot(wpilib.IterativeRobot):
 
         # NetworkTables.initialize(server='roborio-1571-frc.local')
 
-        # cs = CameraServer.getInstance()
-        # cs.enableLogging()
-        #
-        # camera = cs.startAutomaticCapture()
-        #
-        # camera.setResolution(320, 240)
-        #
-        # x = cs.getInstance()
-        # print(x)
+        #cs = CameraServer.getInstance()
+        #cs.enableLogging()
+
+        #camera = cs.startAutomaticCapture()
+
+        #camera.setResolution(320, 240)
+
+        #x = cs.getInstance()
+        #print(x)
 
 
         self.controller = wpilib.XboxController(0)
 
 
-        self.fr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(2)
-        self.rr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(3)
+        self.fr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(2) #2
+        self.rr_motor = ctre.wpi_talonsrx.WPI_TalonSRX(3) #3
         self.right = wpilib.SpeedControllerGroup(self.fr_motor, self.rr_motor)
 
         self.fl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(0)
-        self.rl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(1)
+        self.rl_motor = ctre.wpi_talonsrx.WPI_TalonSRX(1) #1
         self.left = wpilib.SpeedControllerGroup(self.fl_motor, self.rl_motor)
 
         self.mid_motor = ctre.wpi_talonsrx.WPI_TalonSRX(5)
@@ -48,6 +48,7 @@ class robot(wpilib.IterativeRobot):
         self.lift = wpilib.Solenoid(0, 0)
         self.grab = wpilib.Solenoid(0, 1)
 
+        self.timer = wpilib.Timer()
 
 
 
@@ -55,16 +56,15 @@ class robot(wpilib.IterativeRobot):
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
-        self.timer = wpilib.Timer
 
-        self.timer.start()
         self.timer.reset()
+        self.timer.start()
 
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
         while self.isAutonomous() and self.isEnabled():
             # Drive for two seconds
-            if self.Timer.get() < 2.0:
+            if self.timer.get() < 2.0:
                 self.drive.arcadeDrive(-0.5, 0)  # Drive forwards at half speed
             else:
                 self.drive.arcadeDrive(0, 0)  # Stop robot
