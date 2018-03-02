@@ -67,7 +67,7 @@ class robot(wpilib.IterativeRobot):
             if self.timer.get() < 0.0:
                 self.drive.arcadeDrive(-0.5, 0)  # Drive forwards at half speed
             elif self.timer.get() < 5.0:
-                self.drive.arcadeDrive()
+                self.drive.arcadeDrive(0, 0)
             else:
                 self.drive.arcadeDrive(0, 0)  # Stop robot
 
