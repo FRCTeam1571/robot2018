@@ -1,8 +1,6 @@
 This is the code for 1571's 2018 robot.
 
-Autonomous:
-
- Drives forward for 5 seconds
+Autonomous:/n/tDrives forward for 5 seconds
 
 Teleop controls:
 
