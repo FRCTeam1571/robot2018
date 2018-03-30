@@ -1,12 +1,12 @@
 
 #!/usr/bin/env python3
-#Modified: 3/17
+#Modified: 3/29
 
 import wpilib
 from wpilib import drive, Timer
 import ctre
 from networktables import NetworkTables
-
+import rangefinder
 
 
 
@@ -62,6 +62,10 @@ class robot(wpilib.IterativeRobot):
 
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
 
+        # Ultrasonic Sensor #
+        rangefinder.Maxbotultrasonic.Maxbotultrasonic(self, 0)
+        self.ultrasonic = rangefinder.Maxbotultrasonic
+
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -86,6 +90,8 @@ class robot(wpilib.IterativeRobot):
         self.grab.set(False)
         self.GrabToggle = False
         self.GrabLast = False
+        self.timer.reset()
+        self.timer.start()
 
 
 
@@ -161,6 +167,12 @@ class robot(wpilib.IterativeRobot):
 
             self.sd.putNumber('Relay Value', self.loader.get())
             self.sd.putBoolean('Relay Fwd', self.relaybool)
+
+            # Ultrasonic #
+            if self.timer.get() >= 2.0:
+                self.timer.reset()
+                self.timer.start()
+                self.table.putNumber('Range In Inches', self.ultrasonic.GetRangeInInches(self))
 
 
 
