@@ -1,4 +1,4 @@
-This is the code for 1571's 2018 robot for FIRST Power Up Made by [@trevor34](https://github.com/trevor34)
+This is the code for 1571's 2018 robot for FIRST Power Up. Made by [@trevor34](https://github.com/trevor34)
 
 How to deploy:
 - Attach USB type A to type B cable to RoboRIO and the computer and turn on robot
