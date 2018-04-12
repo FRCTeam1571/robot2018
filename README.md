@@ -27,9 +27,7 @@ Teleop controls:
 - Left Trigger - Forward
 - Left Bumper + Left Trigger - Reverse
 - B button - Intake motors in
-- Y button - Intake motors out
-- A button - Lift
+- A button - Intake motors out
 - X button - Grabber toggle
 - Right Bumper - Relay forward
 - Right Trigger - Relay back
-
