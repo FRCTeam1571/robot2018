@@ -1,4 +1,4 @@
-This is the code for 1571's 2018 robot. Made by (@trevor34)[https://github.com/trevor34]
+This is the code for 1571's 2018 robot. Made by [@trevor34](https://github.com/trevor34)
 
 How to deploy:
 - Open command prompt
