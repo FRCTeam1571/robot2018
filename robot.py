@@ -1,9 +1,13 @@
 
 #!/usr/bin/env python3
-#Modified: 3/29
+#Modified: 3/30
+
+# For Solenoids:
+# False = Up
+# True = Down
 
 import wpilib
-from wpilib import drive, Timer
+from wpilib import drive, Timer, SendableChooser
 import ctre
 from networktables import NetworkTables
 import rangefinder
@@ -16,7 +20,7 @@ class robot(wpilib.IterativeRobot):
         '''Robot Initiation'''
 
         NetworkTables.initialize(server='roborio-1571-frc.local')
-        self.sd = NetworkTables.getTable('SmartDashboard')
+        self.table = NetworkTables.getTable('SmartDashboard')
 
 
 
@@ -26,8 +30,7 @@ class robot(wpilib.IterativeRobot):
 
 
 
-        self.controller0 = wpilib.XboxController(0)
-        self.controller1 = wpilib.XboxController(1)
+        self.controller = wpilib.XboxController(0)
 
         # Talon SRX #
         # Right drivetrain
@@ -66,12 +69,36 @@ class robot(wpilib.IterativeRobot):
         rangefinder.Maxbotultrasonic.Maxbotultrasonic(self, 0)
         self.ultrasonic = rangefinder.Maxbotultrasonic
 
+        # self.chooser = wpilib.SendableChooser()
+        # self.chooser.addDefault("Left", -1)
+        # self.chooser.addObject("Right", 1)
+        # wpilib.SmartDashboard.putData("Choice", self.chooser)
+        # self.select = -1
+
+
+    def disabledInit(self):
+        # self.timer.reset()
+        # self.timer.start()
+
+        self.lift.set(False)
+
+    def disabledPeriodic(self):
+
+        # Ultrasonic test #
+        # if self.timer.get() >= 2.0:
+        #     self.timer.reset()
+        #     self.timer.start()
+        #     self.table.putNumber('Range In Inches', self.ultrasonic.GetRangeInInches(self))
+
+        self.lift.set(False)
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
 
         self.timer.reset()
         self.timer.start()
+        # self.select = self.chooser.getSelected()
+
 
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
@@ -81,15 +108,17 @@ class robot(wpilib.IterativeRobot):
                 self.drive.arcadeDrive(0.5, 0)  # Drive forwards at half speed
             else:
                 self.drive.arcadeDrive(0, 0)  # Stop robot
+            # elif self.timer.get() > 10.0 and self.timer.get() < 11.5:
+            #     self.drive.arcadeDrive(0, 0.5 * self.select) # Changes to - for Left side, change to + for Right side
+            # elif self.timer.get() > 11.5 and self.timer.get() < 13.0:
+                # self.drive.arcadeDrive(-0.5, 0)
+
 
     def teleopInit(self):
         """This function is run once each time the robot enters teleop mode"""
-        self.kLeft = self.controller0.Hand.kLeft
-        self.kRight = self.controller0.Hand.kRight
-        self.lift.set(False)
-        self.grab.set(False)
-        self.GrabToggle = False
-        self.GrabLast = False
+        self.kLeft = self.controller.Hand.kLeft
+        self.kRight = self.controller.Hand.kRight
+        self.lift.set(True) #True makes it fall
         self.timer.reset()
         self.timer.start()
 
@@ -102,84 +131,40 @@ class robot(wpilib.IterativeRobot):
         while self.isOperatorControl() and self.isEnabled():
 
             # Sets triggers and bumpers each loop
-            self.TriggerLeft = self.controller0.getTriggerAxis(self.kLeft)
-            self.TriggerRight = self.controller0.getTriggerAxis(self.kRight)
-            self.BumperLeft = self.controller0.getBumper(self.kLeft)
-            self.BumperRight = self.controller0.getBumper(self.kRight)
+            self.TriggerLeft = self.controller.getTriggerAxis(self.kLeft)
+            self.TriggerRight = self.controller.getTriggerAxis(self.kRight)
+            self.BumperLeft = self.controller.getBumper(self.kLeft)
+            self.BumperRight = self.controller.getBumper(self.kRight)
 
 
             # backwards control
             if self.BumperLeft:
                 self.TriggerLeft = self.TriggerLeft * -1
 
-            # if self.BumperRight:
-            #     self.TriggerRight = self.TriggerRight * -1
-
             # Drive #
-            self.drive.arcadeDrive(self.TriggerLeft, self.controller0.getX(self.kLeft))
-
-            # Middle wheel #
-            # trigger control
-            # self.mid_motor.set(self.TriggerRight)
-            # stick control
-            # if abs(self.controller0.getX(self.kRight)) > 0.2:
-            #     self.mid_motor.set(self.controller0.getX(self.kRight))
-            # else:
-            #     self.mid_motor.set(0.0)
+            self.drive.arcadeDrive(self.TriggerLeft, self.controller.getX(self.kLeft))
 
             # Intake Motors #
-            if self.controller0.getBButton():
-                self.intake.set(0.25)
-            elif self.controller0.getYButton():
-                self.intake.set(-0.25)
+            if self.controller.getBButton():
+                self.intake.set(1.0)
+            elif self.controller.getAButton():
+                self.intake.set(-1.0)
             else:
                 self.intake.set(0)
 
-            # Solenoids #
-            # Lift
-            if self.controller0.getAButtonPressed() and not self.lift.get():
-                self.lift.set(True)
-            elif self.controller0.getAButtonReleased() and self.lift.get():
-                self.lift.set(False)
-
-            # Grabber
-            if self.controller0.getXButton() and not self.GrabLast:
-                 self.GrabToggle = not self.GrabToggle
-
-            self.GrabLast = self.controller0.getXButton()
-            self.grab.set(self.GrabToggle)
-
             # Loader #
-            # Control
-            if self.controller1.getAButton():
+            if self.TriggerRight:
                 self.loader.set(wpilib.Relay.Value.kForward)
-            elif self.controller1.getBButton():
+            elif self.BumperRight:
                 self.loader.set(wpilib.Relay.Value.kReverse)
             else:
                 self.loader.set(wpilib.Relay.Value.kOff)
 
-            # SmartDashboard
-            self.relayvalue = self.loader.get()
-            if self.relayvalue == wpilib.Relay.Value.kForward:
-                self.relaybool = True
-            else:
-                self.relaybool = False
-
-            self.sd.putNumber('Relay Value', self.loader.get())
-            self.sd.putBoolean('Relay Fwd', self.relaybool)
-
             # Ultrasonic #
-            if self.timer.get() >= 2.0:
-                self.timer.reset()
-                self.timer.start()
-                self.table.putNumber('Range In Inches', self.ultrasonic.GetRangeInInches(self))
-
-
-
-
-
-
-
+            # if self.timer.get() >= 2.0:
+            #     self.timer.reset()
+            #     self.timer.start()
+            #     self.table.putNumber('Range In Inches', self.ultrasonic.GetRangeInInches(self))
 
 
 if __name__ == "__main__":
