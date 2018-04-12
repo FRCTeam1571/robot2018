@@ -2,8 +2,8 @@ This is the code for 1571's 2018 robot. Made by [@trevor34](https://github.com/t
 
 How to deploy:
 - Open command prompt
-- Type cd c:/path/to/file
-- Type py robot.py --skip-tests
+- Type `cd c:/path/to/file`
+- Type `py robot.py --skip-tests`
 - Open driverstation software
 - Wait for both communications and robot code light to go green
 
